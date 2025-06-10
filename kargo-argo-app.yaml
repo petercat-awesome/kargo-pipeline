@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kargo-app-hello-world-dev
+  namespace: argocd  # Replace with your Argo CD namespace
+  annotations:
+    kargo.akuity.io/authorized-stage: "kargo-demo:dev"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/petercat-awesome/argo-appsets.git
+    targetRevision: HEAD  # Replace with the desired branch or commit
+    path: hello-world/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd  # Or wherever you want the generated apps to go
