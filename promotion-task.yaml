@@ -1,0 +1,31 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: PromotionTask
+metadata:
+  name: demo-promo-process
+  namespace: kargo-demo
+spec:
+  steps:
+  - uses: git-clone
+    config:
+      repoURL: https://github.com/petercat-awesome/argo-appsets.git
+      checkout:
+      - branch: master
+        path: ./src
+  - uses: yaml-update
+    config:
+      path: ./src/hello-world/dev/appset.yaml
+      updates:
+      - key: spec.template.spec.source.targetRevision
+        value:  ${{ chartFrom("oci://ghcr.io/petercat-awesome/hello-world", warehouse("kargo-demo")).Version }}
+  - uses: git-commit
+    as: commit
+    config:
+      path: ./src
+      message: 'updated appset for hello-world to version ${{ chartFrom("oci://ghcr.io/petercat-awesome/hello-world", warehouse("kargo-demo")).Version }}'
+  - uses: git-push
+    config:
+      path: ./src
+  - uses: argocd-update
+    config:
+      apps:
+      - name: kargo-app-hello-world-dev
